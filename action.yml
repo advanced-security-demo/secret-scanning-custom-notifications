@@ -1,11 +1,13 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: "Secret Scanning Custom Notifications"
+description: "A GitHub action that runs on a user specified frequency to retrieve new, closed and dismissed secret scanning alerts since last run. It sends out emails to the security managers."
+author: "ps-advanced-security"
 inputs:
-  milliseconds: # change this
+  frequency:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: "Defines how often the action should run."
+  level:
+    required: true
+    description: "Defines whether the Action should run on the repo, org or enterprise level."
 runs:
-  using: 'node16'
-  main: 'dist/index.js'
+  using: "node16"
+  main: "dist/index.js"
