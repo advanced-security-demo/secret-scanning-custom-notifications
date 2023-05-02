@@ -47,6 +47,7 @@ const github = __importStar(__nccwpck_require__(5438));
 const utils_1 = __nccwpck_require__(3030);
 const retry = __importStar(__nccwpck_require__(6298));
 const console_log_level_1 = __importDefault(__nccwpck_require__(385));
+const fs = __importStar(__nccwpck_require__(7147));
 function getRequiredEnvParam(paramName) {
     const value = process.env[paramName];
     if (value === undefined || value.length === 0) {
@@ -54,35 +55,148 @@ function getRequiredEnvParam(paramName) {
     }
     return value;
 }
+function calculateDateRange(frequency) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const now = new Date();
+        const nowMinusFrequency = new Date(now.getTime() - frequency * 60 * 60 * 1000);
+        return nowMinusFrequency;
+    });
+}
+function processRepoLevelAlerts(client, minimumDate) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const nwo = github.context.repo;
+        //add in extra params based on requirements
+        const repoResponse = yield client.rest.secretScanning.listAlertsForRepo(Object.assign({}, nwo));
+        //filter response to only include alerts that are create betweween nowMinusFrequency and now
+        const newAlertsResponse = repoResponse.data.filter(alert => {
+            if (alert.created_at != null) {
+                const created = new Date(alert.created_at);
+                return created > minimumDate && created < new Date();
+            }
+        });
+        //print output for debugging
+        core.debug(`The filtered response is ${JSON.stringify(newAlertsResponse)}`);
+        //map only the properties we're interested in
+        const newAlertsResponseFiltered = newAlertsResponse.map(alert => {
+            return {
+                secret_type: alert.secret_type,
+                secret_state: alert.state,
+                secret_url: alert.url
+            };
+        });
+        //write newAlertsResponseFiltered to json file using fs
+        fs.writeFile('newAlertsRepo.json', JSON.stringify(newAlertsResponseFiltered), err => {
+            if (err) {
+                throw err;
+            }
+            core.debug('JSON data is saved.');
+        });
+        const resolvedAlertsResponse = repoResponse.data.filter(alert => {
+            if (alert.resolved_at != null && alert.state === 'resolved') {
+                const resolved = new Date(alert.resolved_at);
+                alert.state === 'resolved';
+                return resolved > minimumDate && resolved < new Date();
+            }
+        });
+        core.debug(`The filtered response is ${JSON.stringify(resolvedAlertsResponse)}`);
+        const resolvedAlertsResponseFiltered = newAlertsResponse.map(alert => {
+            return {
+                secret_type: alert.secret_type,
+                secret_state: alert.state,
+                secret_url: alert.url,
+                secret_resolved_by: alert.resolved_by,
+                secret_resolved_at: alert.resolved_at
+            };
+        });
+        //write resolvedAlertsResponse to json file using fs
+        fs.writeFile('resolvedAlertsRepo.json', JSON.stringify(resolvedAlertsResponseFiltered), err => {
+            if (err) {
+                throw err;
+            }
+            core.debug('JSON data is saved.');
+        });
+    });
+}
+//process Org level alerts
+function processOrgLevelAlerts(client, minimumDate) {
+    return __awaiter(this, void 0, void 0, function* () {
+        //Org level file generation
+        const org = github.context.repo.owner;
+        const orgResponse = yield client.rest.secretScanning.listAlertsForOrg({ org });
+        core.debug(`The orgResponse is ${JSON.stringify(orgResponse)}`);
+        const newAlertsResponse = orgResponse.data.filter(alert => {
+            if (alert.created_at != null) {
+                const created = new Date(alert.created_at);
+                return created > minimumDate && created < new Date();
+            }
+        });
+        core.debug(`The filtered response is ${JSON.stringify(newAlertsResponse)}`);
+        const newAlertsResponseFiltered = newAlertsResponse.map(alert => {
+            var _a;
+            return {
+                secret_repo: (_a = alert === null || alert === void 0 ? void 0 : alert.repository) === null || _a === void 0 ? void 0 : _a.full_name,
+                secret_type: alert.secret_type,
+                secret_state: alert.state,
+                secret_url: alert.url
+            };
+        });
+        //write newAlertsResponseFiltered to json file using fs
+        fs.writeFile('newAlertsOrg.json', JSON.stringify(newAlertsResponseFiltered), err => {
+            if (err) {
+                throw err;
+            }
+            core.debug('JSON data is saved.');
+        });
+        const resolvedAlertsResponse = orgResponse.data.filter(alert => {
+            if (alert.resolved_at != null && alert.state === 'resolved') {
+                const resolved = new Date(alert.resolved_at);
+                alert.state === 'resolved';
+                return resolved > minimumDate && resolved < new Date();
+            }
+        });
+        core.debug(`The filtered response is ${JSON.stringify(resolvedAlertsResponse)}`);
+        const resolvedAlertsResponseFiltered = newAlertsResponse.map(alert => {
+            var _a;
+            return {
+                secret_repo: (_a = alert === null || alert === void 0 ? void 0 : alert.repository) === null || _a === void 0 ? void 0 : _a.full_name,
+                secret_type: alert.secret_type,
+                secret_state: alert.state,
+                secret_url: alert.url,
+                secret_resolved_by: alert.resolved_by,
+                secret_resolved_at: alert.resolved_at
+            };
+        });
+        //write resolvedAlertsResponse to json file using fs
+        fs.writeFile('resolvedAlertsOrg.json', JSON.stringify(resolvedAlertsResponseFiltered), err => {
+            if (err) {
+                throw err;
+            }
+            core.debug('JSON data is saved.');
+        });
+    });
+}
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const frequency = Number(core.getInput('frequency'));
             core.debug(`The frequency input is ${frequency}`); // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
             const level = core.getInput('level');
-            const api_token = core.getInput("token") || getRequiredEnvParam("GITHUB_TOKEN");
-            const apiURL = getRequiredEnvParam("GITHUB_API_URL");
+            const api_token = core.getInput('token') || getRequiredEnvParam('GITHUB_TOKEN');
+            const apiURL = getRequiredEnvParam('GITHUB_API_URL');
             const retryingOctokit = utils_1.GitHub.plugin(retry.retry);
             const client = new retryingOctokit((0, utils_1.getOctokitOptions)(api_token, {
                 baseUrl: apiURL,
-                userAgent: "secret-scanning-custom-notification",
-                log: (0, console_log_level_1.default)({ level: "debug" }),
+                userAgent: 'secret-scanning-custom-notification',
+                log: (0, console_log_level_1.default)({ level: 'debug' })
             }));
+            //Calculate date range
+            const minimumDate = yield calculateDateRange(frequency);
+            //Repo level file generation
             if (level === 'repo') {
-                const nwo = github.context.repo;
-                //add in extra params based on requirements 
-                const repoResponse = yield client.rest.secretScanning.listAlertsForRepo(Object.assign({}, nwo));
-                //get UTC Date and time now 
-                const now = new Date();
-                //get UTC Date and time now minus frequency in hours
-                const nowMinusFrequency = new Date(now.getTime() - frequency * 60 * 60 * 1000);
-                //filter response to only include alerts that are create betweween nowMinusFrequency and now
-                const filteredResponse = repoResponse.data.filter((alert) => {
-                    const created = new Date(Number(alert.created_at));
-                    return created > nowMinusFrequency && created < now;
-                });
-                //print output for debugging
-                core.debug(`The filtered response is ${JSON.stringify(filteredResponse)}`);
+                yield processRepoLevelAlerts(client, minimumDate);
+            }
+            else if (level === 'organisation') {
+                yield processOrgLevelAlerts(client, minimumDate);
             }
         }
         catch (error) {
