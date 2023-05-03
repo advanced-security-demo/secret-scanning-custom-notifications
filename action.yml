@@ -5,9 +5,25 @@ inputs:
   frequency:
     required: true
     description: "Defines how often the action should run."
-  level:
+  scope:
     required: true
     description: "Defines whether the Action should run on the repo, org or enterprise level."
+  token:
+    required: true
+    description: "The GitHub API token to use for the action."
+  api_url:
+    required: false
+    description: "The GitHub API URL to use for the action. Needed only if you are using GitHub Enterprise Server."
+  repo:
+    required: false
+    description: "The repo to run the action on. Needed only if scope is repo and you intend to fetch alerts form other repos then the one where the action is running."
+  org:
+    required: false
+    description: "The org to run the action on. Needed only if scope is org and you intend to fetch alerts form other repos then the one where the action is running."
+  enterprise:
+    required: false
+    description: "The enterprise to run the action on. Required if you run in on the enterprise level."
+  
 runs:
   using: "node16"
   main: "dist/index.js"
