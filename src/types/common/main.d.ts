@@ -8,6 +8,8 @@ type inputsReturned = {
   repo: string
   owner: string
   enterprise: string
+  new_alerts_filepath: string
+  closed_alerts_filepath: string
 }
 
 type scopeInput = 'organisation' | 'repository' | 'enterprise'

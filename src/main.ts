@@ -29,8 +29,8 @@ async function run(): Promise<void> {
     core.debug(`The filtered new alerts is ${JSON.stringify(newAlerts)}`)
 
     // Save newAlerts and resolvedAlerts to file
-    writeToFile('newAlerts.json', JSON.stringify(newAlerts))
-    writeToFile('resolvedAlerts.json', JSON.stringify(resolvedAlerts))
+    writeToFile(inputs.new_alerts_filepath , JSON.stringify(newAlerts))
+    writeToFile(inputs.closed_alerts_filepath, JSON.stringify(resolvedAlerts))
     core.debug('New alerts JSON data is saved.')
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)

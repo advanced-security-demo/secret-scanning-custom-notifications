@@ -1,5 +1,432 @@
-/******/ (() => { // webpackBootstrap
+require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
+
+/***/ 9464:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.MyOctokit = void 0;
+const action_1 = __nccwpck_require__(1231);
+class MyOctokit extends action_1.Octokit {
+    constructor(input) {
+        super({
+            baseUrl: input.apiURL,
+            auth: input.api_token,
+            throttle: {
+                onRateLimit: (retryAfter, options, octokit) => {
+                    octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
+                    if (options.request.retryCount <= 2) {
+                        octokit.log.warn(`Retrying after ${retryAfter} seconds!`);
+                        return true;
+                    }
+                },
+                onSecondaryRateLimit: (retryAfter, options, octokit) => {
+                    octokit.log.warn(`Secondary rate limit for request ${options.method} ${options.url}`);
+                    if (options.request.retryCount <= 2) {
+                        octokit.log.warn(`Secondary Limit - Retrying after ${retryAfter} seconds!`);
+                        return true;
+                    }
+                }
+            }
+        });
+    }
+}
+exports.MyOctokit = MyOctokit;
+
+
+/***/ }),
+
+/***/ 9386:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EnterpriseSecretScanningAlerts = exports.OrgSecretScanningAlerts = exports.RepoSecretScanningAlerts = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const myoctokit_1 = __nccwpck_require__(9464);
+const RepoSecretScanningAlerts = async (input) => {
+    let res = [];
+    try {
+        const octokit = new myoctokit_1.MyOctokit(input);
+        const iterator = await octokit.paginate('GET /repos/{owner}/{repo}/secret-scanning/alerts', {
+            owner: input.owner,
+            repo: input.repo,
+            per_page: 100
+        }, response => {
+            return response.data;
+        });
+        res = iterator;
+    }
+    catch (error) {
+        core.setFailed(`There was an error. Please check the logs${error}`);
+    }
+    return res;
+};
+exports.RepoSecretScanningAlerts = RepoSecretScanningAlerts;
+const OrgSecretScanningAlerts = async (input) => {
+    let res = [];
+    try {
+        const octokit = new myoctokit_1.MyOctokit(input);
+        const iterator = await octokit.paginate('GET /orgs/{org}/secret-scanning/alerts', {
+            org: input.owner,
+            per_page: 100
+        }, response => {
+            return response.data;
+        });
+        res = iterator;
+    }
+    catch (error) {
+        core.setFailed(`There was an error. Please check the logs${error}`);
+    }
+    return res;
+};
+exports.OrgSecretScanningAlerts = OrgSecretScanningAlerts;
+const EnterpriseSecretScanningAlerts = async (input) => {
+    let res = [];
+    try {
+        const octokit = new myoctokit_1.MyOctokit(input);
+        const iterator = await octokit.paginate('GET /enterprises/{enterprise}/secret-scanning/alerts', {
+            enterprise: input.enterprise,
+            per_page: 100
+        }, response => {
+            return response.data;
+        });
+        res = iterator;
+    }
+    catch (error) {
+        core.setFailed(`There was an error. Please check the logs${error}`);
+    }
+    return res;
+};
+exports.EnterpriseSecretScanningAlerts = EnterpriseSecretScanningAlerts;
+
+
+/***/ }),
+
+/***/ 3109:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(2186));
+const inputs_1 = __nccwpck_require__(1278);
+const utils_1 = __nccwpck_require__(1316);
+const secretscanning_1 = __nccwpck_require__(2732);
+const utils_2 = __nccwpck_require__(1316);
+async function run() {
+    try {
+        const inputs = await (0, inputs_1.inputs)();
+        core.info(`[✅] Inputs parsed]`);
+        //Calculate date range
+        const minimumDate = await (0, utils_1.calculateDateRange)(inputs.frequency);
+        core.info(`[✅] Date range calculated: ${minimumDate}`);
+        //Get the alerts for the scope provided
+        const alerts = await (0, secretscanning_1.getSecretScanningAlertsForScope)(inputs);
+        // Filter new alerts created after the minimum date and before the current date
+        const [newAlerts, resolvedAlerts] = await (0, secretscanning_1.filterAlerts)(minimumDate, alerts);
+        // Log filtered resolved alerts
+        core.debug(`The filtered resolved alrets is ${JSON.stringify(resolvedAlerts)}`);
+        core.debug(`The filtered new alerts is ${JSON.stringify(newAlerts)}`);
+        // Save newAlerts and resolvedAlerts to file
+        (0, utils_2.writeToFile)(inputs.new_alerts_filepath, JSON.stringify(newAlerts));
+        (0, utils_2.writeToFile)(inputs.closed_alerts_filepath, JSON.stringify(resolvedAlerts));
+        core.debug('New alerts JSON data is saved.');
+    }
+    catch (error) {
+        if (error instanceof Error)
+            core.setFailed(error.message);
+    }
+}
+run();
+
+
+/***/ }),
+
+/***/ 2732:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.filterAlerts = exports.getSecretScanningAlertsForScope = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const secretscanningalerts_1 = __nccwpck_require__(9386);
+async function getSecretScanningAlertsForScope(input) {
+    let res = [];
+    if (input.scope === 'repository') {
+        res = await (0, secretscanningalerts_1.RepoSecretScanningAlerts)(input);
+    }
+    else if (input.scope === 'organisation') {
+        res = await (0, secretscanningalerts_1.OrgSecretScanningAlerts)(input);
+    }
+    else if (input.scope === 'enterprise') {
+        res = await (0, secretscanningalerts_1.EnterpriseSecretScanningAlerts)(input);
+    }
+    else {
+        core.info(`[❌] Scope is invalid`);
+    }
+    return res;
+}
+exports.getSecretScanningAlertsForScope = getSecretScanningAlertsForScope;
+// filter the alerts based on the minimum date and current date and by status (new or resolved) and return in two objects
+async function filterAlerts(minimumDate, alerts) {
+    // Filter new alerts created after the minimum date and before the current date
+    const newAlertsResponse = alerts.filter(alert => {
+        if (alert.created_at != null) {
+            const created = new Date(alert.created_at);
+            return created > minimumDate && created < new Date();
+        }
+    });
+    // Filter resolved alerts created after the minimum date and before the current date
+    const resolvedAlertsResponse = alerts.filter(alert => {
+        if (alert.resolved_at != null && alert.status === 'resolved') {
+            const resolved = new Date(alert.resolved_at);
+            alert.status === 'resolved';
+            return resolved > minimumDate && resolved < new Date();
+        }
+    });
+    return [newAlertsResponse, resolvedAlertsResponse];
+}
+exports.filterAlerts = filterAlerts;
+
+
+/***/ }),
+
+/***/ 1278:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.inputs = void 0;
+// Get inputs for the action
+const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+const dotenv = __importStar(__nccwpck_require__(2437));
+dotenv.config();
+const inputs = async () => {
+    try {
+        let frequency;
+        let scope;
+        let api_token;
+        let apiURL;
+        let repo = '';
+        let owner = '';
+        let enterprise = '';
+        let new_alerts_filepath;
+        let closed_alerts_filepath;
+        //if the env LOCAL_DEV is set to true, then use the .env file
+        if (process.env.LOCAL_DEV === 'true') {
+            frequency = Number(process.env.FREQUENCY);
+            scope = process.env.SCOPE;
+            api_token = process.env.GITHUB_TOKEN;
+            apiURL = process.env.GITHUB_API_URL;
+            repo = process.env.GITHUB_REPOSITORY;
+            owner = process.env.GITHUB_ACTOR;
+            enterprise = process.env.GITHUB_ENTERPRISE;
+            new_alerts_filepath = process.env.CREATE_ALERTS_FILEPATH;
+            closed_alerts_filepath = process.env.UPDATED_ALERTS_FILEPATH;
+        }
+        else {
+            //otherwise use the inputs from the action
+            frequency = Number(core.getInput('frequency'));
+            scope = core.getInput('scope');
+            api_token = core.getInput('token');
+            apiURL = core.getInput('api_url');
+            repo = core.getInput('repo') || github.context.repo.repo;
+            owner = core.getInput('owner') || github.context.repo.owner;
+            enterprise = core.getInput('enterprise');
+            new_alerts_filepath = core.getInput('new_alerts_filepath');
+            closed_alerts_filepath = core.getInput('closed_alerts_filepath');
+        }
+        return {
+            frequency,
+            scope,
+            api_token,
+            apiURL,
+            repo,
+            owner,
+            enterprise,
+            new_alerts_filepath,
+            closed_alerts_filepath
+        };
+    }
+    catch (error) {
+        if (error instanceof Error) {
+            core.debug(`Error in inputs.ts: ${error}`);
+            core.setFailed('Error: There was an error getting the inputs. Please check the logs.');
+            throw new Error(error.message);
+        }
+    }
+    throw new Error('Unexpected error occurred in inputs.ts');
+};
+exports.inputs = inputs;
+
+
+/***/ }),
+
+/***/ 1316:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.writeToFile = exports.calculateDateRange = exports.getRequiredEnvParam = void 0;
+const fs_1 = __importDefault(__nccwpck_require__(7147));
+const dotenv = __importStar(__nccwpck_require__(2437));
+dotenv.config();
+function getRequiredEnvParam(paramName) {
+    const value = process.env[paramName];
+    if (value === undefined || value.length === 0) {
+        throw new Error(`${paramName} environment variable must be set`);
+    }
+    return value;
+}
+exports.getRequiredEnvParam = getRequiredEnvParam;
+async function calculateDateRange(frequency) {
+    const now = new Date();
+    const nowMinusFrequency = new Date(now.getTime() - frequency * 60 * 60 * 1000);
+    return nowMinusFrequency;
+}
+exports.calculateDateRange = calculateDateRange;
+function writeToFile(fileName, data) {
+    //make temp directory
+    var dir = './tmp';
+    if (!fs_1.default.existsSync(dir)) {
+        fs_1.default.mkdirSync(dir);
+    }
+    fs_1.default.writeFile(fileName, data, err => {
+        if (err) {
+            throw err;
+        }
+    });
+}
+exports.writeToFile = writeToFile;
+
+
+/***/ }),
 
 /***/ 7351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
@@ -13643,421 +14070,6 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 7543:
-/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MyOctokit = void 0;
-const action_1 = __nccwpck_require__(1231);
-class MyOctokit extends action_1.Octokit {
-    constructor(input) {
-        super({
-            baseUrl: input.apiURL,
-            auth: input.api_token,
-            throttle: {
-                onRateLimit: (retryAfter, options, octokit) => {
-                    octokit.log.warn(`Request quota exhausted for request ${options.method} ${options.url}`);
-                    if (options.request.retryCount <= 2) {
-                        octokit.log.warn(`Retrying after ${retryAfter} seconds!`);
-                        return true;
-                    }
-                },
-                onSecondaryRateLimit: (retryAfter, options, octokit) => {
-                    octokit.log.warn(`Secondary rate limit for request ${options.method} ${options.url}`);
-                    if (options.request.retryCount <= 2) {
-                        octokit.log.warn(`Secondary Limit - Retrying after ${retryAfter} seconds!`);
-                        return true;
-                    }
-                }
-            }
-        });
-    }
-}
-exports.MyOctokit = MyOctokit;
-
-
-/***/ }),
-
-/***/ 5944:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EnterpriseSecretScanningAlerts = exports.OrgSecretScanningAlerts = exports.RepoSecretScanningAlerts = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const myoctokit_1 = __nccwpck_require__(7543);
-const RepoSecretScanningAlerts = async (input) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /repos/{owner}/{repo}/secret-scanning/alerts', {
-            owner: input.owner,
-            repo: input.repo,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.RepoSecretScanningAlerts = RepoSecretScanningAlerts;
-const OrgSecretScanningAlerts = async (input) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /orgs/{org}/secret-scanning/alerts', {
-            org: input.owner,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.OrgSecretScanningAlerts = OrgSecretScanningAlerts;
-const EnterpriseSecretScanningAlerts = async (input) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /enterprises/{enterprise}/secret-scanning/alerts', {
-            enterprise: input.enterprise,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.EnterpriseSecretScanningAlerts = EnterpriseSecretScanningAlerts;
-
-
-/***/ }),
-
-/***/ 399:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(2186));
-const inputs_1 = __nccwpck_require__(9378);
-const utils_1 = __nccwpck_require__(239);
-const secretscanning_1 = __nccwpck_require__(3417);
-const utils_2 = __nccwpck_require__(239);
-async function run() {
-    try {
-        const inputs = await (0, inputs_1.inputs)();
-        core.info(`[✅] Inputs parsed]`);
-        //Calculate date range
-        const minimumDate = await (0, utils_1.calculateDateRange)(inputs.frequency);
-        core.info(`[✅] Date range calculated: ${minimumDate}`);
-        //Get the alerts for the scope provided
-        const alerts = await (0, secretscanning_1.getSecretScanningAlertsForScope)(inputs);
-        // Filter new alerts created after the minimum date and before the current date
-        const [newAlerts, resolvedAlerts] = await (0, secretscanning_1.filterAlerts)(minimumDate, alerts);
-        // Log filtered resolved alerts
-        core.debug(`The filtered resolved alrets is ${JSON.stringify(resolvedAlerts)}`);
-        core.debug(`The filtered new alerts is ${JSON.stringify(newAlerts)}`);
-        // Save newAlerts and resolvedAlerts to file
-        (0, utils_2.writeToFile)('newAlerts.json', JSON.stringify(newAlerts));
-        (0, utils_2.writeToFile)('resolvedAlerts.json', JSON.stringify(resolvedAlerts));
-        core.debug('New alerts JSON data is saved.');
-    }
-    catch (error) {
-        if (error instanceof Error)
-            core.setFailed(error.message);
-    }
-}
-run();
-
-
-/***/ }),
-
-/***/ 3417:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.filterAlerts = exports.getSecretScanningAlertsForScope = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const secretscanningalerts_1 = __nccwpck_require__(5944);
-async function getSecretScanningAlertsForScope(input) {
-    let res = [];
-    if (input.scope === 'repository') {
-        res = await (0, secretscanningalerts_1.RepoSecretScanningAlerts)(input);
-    }
-    else if (input.scope === 'organisation') {
-        res = await (0, secretscanningalerts_1.OrgSecretScanningAlerts)(input);
-    }
-    else if (input.scope === 'enterprise') {
-        res = await (0, secretscanningalerts_1.EnterpriseSecretScanningAlerts)(input);
-    }
-    else {
-        core.info(`[❌] Scope is invalid`);
-    }
-    return res;
-}
-exports.getSecretScanningAlertsForScope = getSecretScanningAlertsForScope;
-// filter the alerts based on the minimum date and current date and by status (new or resolved) and return in two objects
-async function filterAlerts(minimumDate, alerts) {
-    // Filter new alerts created after the minimum date and before the current date
-    const newAlertsResponse = alerts.filter(alert => {
-        if (alert.created_at != null) {
-            const created = new Date(alert.created_at);
-            return created > minimumDate && created < new Date();
-        }
-    });
-    // Filter resolved alerts created after the minimum date and before the current date
-    const resolvedAlertsResponse = alerts.filter(alert => {
-        if (alert.resolved_at != null && alert.status === 'resolved') {
-            const resolved = new Date(alert.resolved_at);
-            alert.status === 'resolved';
-            return resolved > minimumDate && resolved < new Date();
-        }
-    });
-    return [newAlertsResponse, resolvedAlertsResponse];
-}
-exports.filterAlerts = filterAlerts;
-
-
-/***/ }),
-
-/***/ 9378:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.inputs = void 0;
-// Get inputs for the action
-const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
-const dotenv = __importStar(__nccwpck_require__(2437));
-dotenv.config();
-const inputs = async () => {
-    try {
-        let frequency;
-        let scope;
-        let api_token;
-        let apiURL;
-        let repo = "";
-        let owner = "";
-        let enterprise = "";
-        //if the env LOCAL_DEV is set to true, then use the .env file
-        if (process.env.LOCAL_DEV === 'true') {
-            frequency = Number(process.env.FREQUENCY);
-            scope = process.env.SCOPE;
-            api_token = process.env.GITHUB_TOKEN;
-            apiURL = process.env.GITHUB_API_URL;
-            repo = process.env.GITHUB_REPOSITORY;
-            owner = process.env.GITHUB_ACTOR;
-            enterprise = process.env.GITHUB_ENTERPRISE;
-        }
-        else {
-            //otherwise use the inputs from the action
-            frequency = Number(core.getInput('frequency'));
-            scope = core.getInput('scope');
-            api_token = core.getInput('token');
-            apiURL = core.getInput('api_url');
-            repo = core.getInput('repo') || github.context.repo.repo;
-            owner = core.getInput('owner') || github.context.repo.owner;
-            enterprise = core.getInput('enterprise');
-        }
-        return {
-            frequency,
-            scope,
-            api_token,
-            apiURL,
-            repo,
-            owner,
-            enterprise
-        };
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            core.debug(`Error in inputs.ts: ${error}`);
-            core.setFailed('Error: There was an error getting the inputs. Please check the logs.');
-            throw new Error(error.message);
-        }
-    }
-    throw new Error('Unexpected error occurred in inputs.ts');
-};
-exports.inputs = inputs;
-
-
-/***/ }),
-
-/***/ 239:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.writeToFile = exports.calculateDateRange = exports.getRequiredEnvParam = void 0;
-const fs_1 = __importDefault(__nccwpck_require__(7147));
-const dotenv = __importStar(__nccwpck_require__(2437));
-dotenv.config();
-function getRequiredEnvParam(paramName) {
-    const value = process.env[paramName];
-    if (value === undefined || value.length === 0) {
-        throw new Error(`${paramName} environment variable must be set`);
-    }
-    return value;
-}
-exports.getRequiredEnvParam = getRequiredEnvParam;
-async function calculateDateRange(frequency) {
-    const now = new Date();
-    const nowMinusFrequency = new Date(now.getTime() - frequency * 60 * 60 * 1000);
-    return nowMinusFrequency;
-}
-exports.calculateDateRange = calculateDateRange;
-function writeToFile(fileName, data) {
-    //fs.writeFile(fileName, data))
-    fs_1.default.writeFile(fileName, data, err => {
-        if (err) {
-            throw err;
-        }
-    });
-}
-exports.writeToFile = writeToFile;
-
-
-/***/ }),
-
 /***/ 2877:
 /***/ ((module) => {
 
@@ -14252,8 +14264,9 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(399);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(3109);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
 ;
+//# sourceMappingURL=index.js.map

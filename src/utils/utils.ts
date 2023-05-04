@@ -1,6 +1,6 @@
 import fs from 'fs'
-import * as dotenv from "dotenv";
-dotenv.config();
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 export function getRequiredEnvParam(paramName: string): string {
   const value = process.env[paramName]
@@ -17,7 +17,13 @@ export async function calculateDateRange(frequency: number): Promise<Date> {
 }
 
 export function writeToFile(fileName: string, data: string): void {
-  //fs.writeFile(fileName, data))
+  //make temp directory
+  var dir = './tmp'
+
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir)
+  }
+
   fs.writeFile(fileName, data, err => {
     if (err) {
       throw err
