@@ -34,7 +34,7 @@ export const inputs = async (): Promise<inputsReturned> => {
       frequency = Number(core.getInput('frequency'))
       scope = core.getInput('scope') as scopeInput
       api_token = core.getInput('token')
-      apiURL = core.getInput('api_url')
+      apiURL = core.getInput('api_url') || github.context.apiUrl
       repo = core.getInput('repo') || github.context.repo.repo
       owner = core.getInput('owner') || github.context.repo.owner
       enterprise = core.getInput('enterprise')
