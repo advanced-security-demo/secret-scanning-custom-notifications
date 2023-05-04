@@ -17,13 +17,6 @@ export async function calculateDateRange(frequency: number): Promise<Date> {
 }
 
 export function writeToFile(fileName: string, data: string): void {
-  //make temp directory
-  var dir = './tmp'
-
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir)
-  }
-
   fs.writeFile(fileName, data, err => {
     if (err) {
       throw err

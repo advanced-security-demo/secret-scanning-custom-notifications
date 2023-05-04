@@ -412,11 +412,6 @@ async function calculateDateRange(frequency) {
 }
 exports.calculateDateRange = calculateDateRange;
 function writeToFile(fileName, data) {
-    //make temp directory
-    var dir = './tmp';
-    if (!fs_1.default.existsSync(dir)) {
-        fs_1.default.mkdirSync(dir);
-    }
     fs_1.default.writeFile(fileName, data, err => {
         if (err) {
             throw err;

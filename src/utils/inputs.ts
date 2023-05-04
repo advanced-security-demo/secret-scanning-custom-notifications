@@ -14,8 +14,8 @@ export const inputs = async (): Promise<inputsReturned> => {
     let repo = ''
     let owner = ''
     let enterprise = ''
-    let new_alerts_filepath :string
-    let closed_alerts_filepath :string
+    let new_alerts_filepath: string
+    let closed_alerts_filepath: string
     //if the env LOCAL_DEV is set to true, then use the .env file
     if (process.env.LOCAL_DEV === 'true') {
       frequency = Number(process.env.FREQUENCY)
