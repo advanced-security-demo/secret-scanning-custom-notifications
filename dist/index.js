@@ -129,6 +129,84 @@ exports.EnterpriseSecretScanningAlerts = EnterpriseSecretScanningAlerts;
 
 /***/ }),
 
+/***/ 1022:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Users = exports.SecurityManagerMembers = exports.OrgSecurityManagers = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const myoctokit_1 = __nccwpck_require__(9464);
+const OrgSecurityManagers = async (input) => {
+    let res = [];
+    try {
+        const octokit = new myoctokit_1.MyOctokit(input);
+        const iterator = await octokit.orgs.listSecurityManagerTeams({ org: input.owner });
+        res = iterator.data;
+    }
+    catch (error) {
+        core.setFailed(`There was an error. Please check the logs${error}`);
+    }
+    return res;
+};
+exports.OrgSecurityManagers = OrgSecurityManagers;
+const SecurityManagerMembers = async (input, team) => {
+    let res = [];
+    try {
+        const octokit = new myoctokit_1.MyOctokit(input);
+        const iterator = await octokit.paginate('GET /orgs/{org}/teams/{team_slug}/members', {
+            org: input.owner,
+            team_slug: team.slug
+        }, response => { return response.data; });
+        res = iterator;
+    }
+    catch (error) {
+        core.setFailed(`There was an error. Please check the logs${error}`);
+    }
+    return res;
+};
+exports.SecurityManagerMembers = SecurityManagerMembers;
+const Users = async (input, username) => {
+    let res = {};
+    try {
+        const octokit = new myoctokit_1.MyOctokit(input);
+        const iterator = await octokit.users.getByUsername({ username: username });
+        res = iterator.data;
+    }
+    catch (error) {
+        core.setFailed(`There was an error. Please check the logs${error}`);
+    }
+    return res;
+};
+exports.Users = Users;
+
+
+/***/ }),
+
 /***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -163,10 +241,31 @@ const inputs_1 = __nccwpck_require__(1278);
 const utils_1 = __nccwpck_require__(1316);
 const secretscanning_1 = __nccwpck_require__(2732);
 const utils_2 = __nccwpck_require__(1316);
+const securitymanagers_1 = __nccwpck_require__(1022);
 async function run() {
     try {
         const inputs = await (0, inputs_1.inputs)();
         core.info(`[✅] Inputs parsed]`);
+        //Get Security Managers
+        const securityManagers = await (0, securitymanagers_1.OrgSecurityManagers)(inputs);
+        //For each data element in Security managers object, get the members
+        securityManagers.forEach(async (team) => {
+            const members = await (0, securitymanagers_1.SecurityManagerMembers)(inputs, team);
+            core.info(`[✅] Members retrieved for team ${members}`);
+            var userEmails = [];
+            for (var member of members) {
+                const user = await (0, securitymanagers_1.Users)(inputs, member.login);
+                core.info(`[✅] User retrieved for ${user.login}, ${user.email}`);
+                if (user.email != null) {
+                    var data = { email: user.email };
+                    //add data to userEmails
+                    userEmails.push(data);
+                }
+            }
+            console.info(`JSON for users is ${JSON.stringify(userEmails)}`);
+            (0, utils_2.writeToFile)("emails.json", JSON.stringify(userEmails));
+        });
+        core.info(`[✅] Security Managers and Members retrieved`);
         //Calculate date range
         const minimumDate = await (0, utils_1.calculateDateRange)(inputs.frequency);
         core.info(`[✅] Date range calculated: ${minimumDate}`);
@@ -221,9 +320,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.filterAlerts = exports.getSecretScanningAlertsForScope = void 0;
+exports.filterAlerts = exports.getSecurityManagersForScope = exports.getSecretScanningAlertsForScope = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const secretscanningalerts_1 = __nccwpck_require__(9386);
+const securitymanagers_1 = __nccwpck_require__(1022);
 async function getSecretScanningAlertsForScope(input) {
     let res = [];
     if (input.scope === 'repository') {
@@ -241,6 +341,12 @@ async function getSecretScanningAlertsForScope(input) {
     return res;
 }
 exports.getSecretScanningAlertsForScope = getSecretScanningAlertsForScope;
+async function getSecurityManagersForScope(input) {
+    let res = [];
+    res = await (0, securitymanagers_1.OrgSecurityManagers)(input);
+    return res;
+}
+exports.getSecurityManagersForScope = getSecurityManagersForScope;
 // filter the alerts based on the minimum date and current date and by status (new or resolved) and return in two objects
 async function filterAlerts(minimumDate, alerts) {
     // Filter new alerts created after the minimum date and before the current date
@@ -311,6 +417,7 @@ const inputs = async () => {
         let enterprise = '';
         let new_alerts_filepath;
         let closed_alerts_filepath;
+        let github_action;
         //if the env LOCAL_DEV is set to true, then use the .env file
         if (process.env.LOCAL_DEV === 'true') {
             frequency = Number(process.env.FREQUENCY);
@@ -322,6 +429,7 @@ const inputs = async () => {
             enterprise = process.env.GITHUB_ENTERPRISE;
             new_alerts_filepath = process.env.CREATE_ALERTS_FILEPATH;
             closed_alerts_filepath = process.env.UPDATED_ALERTS_FILEPATH;
+            github_action = process.env.GITHUB_ACTION;
         }
         else {
             //otherwise use the inputs from the action

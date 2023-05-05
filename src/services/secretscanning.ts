@@ -1,11 +1,12 @@
 import * as core from '@actions/core'
-import type {inputsReturned} from '../types/common/main'
+import type {SecurityManagerTeam, inputsReturned} from '../types/common/main'
 import {
   OrgSecretScanningAlerts,
   RepoSecretScanningAlerts,
   EnterpriseSecretScanningAlerts
 } from '../api/secretscanningalerts'
 import {SecretScanningAlert} from '../types/common/main'
+import { OrgSecurityManagers } from '../api/securitymanagers'
 
 export async function getSecretScanningAlertsForScope(
   input: inputsReturned
@@ -22,6 +23,16 @@ export async function getSecretScanningAlertsForScope(
   }
   return res
 }
+
+export async function getSecurityManagersForScope( 
+  input: inputsReturned 
+  ): Promise<SecurityManagerTeam[]> {
+  let res: SecurityManagerTeam[] = [] 
+  res = await OrgSecurityManagers(input)
+  return res
+  }  
+
+
 
 // filter the alerts based on the minimum date and current date and by status (new or resolved) and return in two objects
 export async function filterAlerts(
