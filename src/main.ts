@@ -6,13 +6,14 @@ import {
   filterAlerts
 } from './services/secretscanning'
 import {writeToFile} from './utils/utils'
+import { addToSummary, writeSummary } from './services/summary'
 //import { OrgSecurityManagers, SecurityManagerMembers, Users } from './api/securitymanagers'
-import { SummaryTableRow } from "@actions/core/lib/summary";
+
 
 async function run(): Promise<void> {
   try {
     const inputs = await getInput()
-    core.info(`[✅] Inputs parsed]`)
+    core.info(`[✅] Inputs parsed`)
 
     //Calculate date range
     const minimumDate = await calculateDateRange(inputs.frequency)
@@ -35,35 +36,12 @@ async function run(): Promise<void> {
     writeToFile(inputs.closed_alerts_filepath, JSON.stringify(resolvedAlerts))
     core.debug('New alerts JSON data is saved.')
     
+    
     // Print them as Action summary output
-    const headers = ['Alert Number', 'Secret Name', 'Repository Name', 'HTML URL']
-    // Define the table rows
-    const rowsNewAlerts = newAlerts.map(alert => [
-      alert.number,
-      alert.secret.name,
-      alert.repository.name,
-      alert.html_url
-    ])
-    const rowsResolvedAlerts = resolvedAlerts.map(alert => [
-      alert.number,
-      alert.secret.name,
-      alert.repository.name,
-      alert.html_url
-    ])
-
-    // Add the table to the Action summary
-    core.summary.addHeading('New Alerts')
-    core.summary.addTable([
-      headers.map(header => ({ data: header, header: true })),
-      ...rowsNewAlerts
-    ] as SummaryTableRow[])
-    core.summary.addHeading('Resolved Alerts')
-    core.summary.addTable([
-      headers.map(header => ({ data: header, header: true })),
-      ...rowsResolvedAlerts
-    ] as SummaryTableRow[])
-    core.summary.write()
-    core.info(`[✅] Action summary written`)
+    addToSummary("New Alerts", newAlerts)
+    addToSummary("Resolved Alerts", resolvedAlerts)
+    writeSummary()
+    core.debug('Summary written.')
 
 
   } catch (error) {
