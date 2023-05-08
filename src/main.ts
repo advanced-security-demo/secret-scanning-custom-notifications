@@ -7,7 +7,7 @@ import {
 } from './services/secretscanning'
 import {writeToFile} from './utils/utils'
 import { OrgSecurityManagers, SecurityManagerMembers, Users } from './api/securitymanagers'
-import { write } from 'fs'
+import { SummaryTableRow } from "@actions/core/lib/summary";
 
 async function run(): Promise<void> {
   try {
@@ -22,20 +22,16 @@ async function run(): Promise<void> {
         const members = await SecurityManagerMembers(inputs, team)
         core.info(`[✅] Members retrieved for team ${members}`)
         
-        var userEmails: { email: string }[] = []
-        for( var member of members){
+        const userEmails: { email: string }[] = []
+        for( const member of members){
           const user = await Users(inputs, member.login)
           core.info(`[✅] User retrieved for ${user.login}, ${user.email}`)
           if(user.email != null){
-          var data = {email : user.email}    
-          //add data to userEmails
-          userEmails.push(data)
+            userEmails.push({email : user.email} )
           }
         }
         console.info(`JSON for users is ${JSON.stringify(userEmails)}`)
         writeToFile("emails.json", JSON.stringify(userEmails))
-
-
     })
 
     core.info(`[✅] Security Managers and Members retrieved`)
@@ -59,6 +55,38 @@ async function run(): Promise<void> {
     writeToFile(inputs.new_alerts_filepath, JSON.stringify(newAlerts))
     writeToFile(inputs.closed_alerts_filepath, JSON.stringify(resolvedAlerts))
     core.debug('New alerts JSON data is saved.')
+    
+    // Print them as Action summary output
+    const headers = ['Alert Number', 'Secret Name', 'Repository Name', 'HTML URL']
+    // Define the table rows
+    const rowsNewAlerts = newAlerts.map(alert => [
+      alert.number,
+      alert.secret.name,
+      alert.repository.name,
+      alert.html_url
+    ])
+    const rowsResolvedAlerts = resolvedAlerts.map(alert => [
+      alert.number,
+      alert.secret.name,
+      alert.repository.name,
+      alert.html_url
+    ])
+
+    // Add the table to the Action summary
+    core.summary.addHeading('New Alerts')
+    core.summary.addTable([
+      headers.map(header => ({ data: header, header: true })),
+      ...rowsNewAlerts
+    ] as SummaryTableRow[])
+    core.summary.addHeading('Resolved Alerts')
+    core.summary.addTable([
+      headers.map(header => ({ data: header, header: true })),
+      ...rowsResolvedAlerts
+    ] as SummaryTableRow[])
+    core.summary.write()
+    core.info(`[✅] Action summary written`)
+
+
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

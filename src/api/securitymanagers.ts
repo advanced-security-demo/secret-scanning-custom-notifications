@@ -29,7 +29,8 @@ export const SecurityManagerMembers = async(
             'GET /orgs/{org}/teams/{team_slug}/members',
             {
                 org: input.owner,
-                team_slug: team.slug
+                team_slug: team.slug,
+                per_page: 100
             }, response => { return response.data }
         )
         res = iterator as unknown as Member[]
