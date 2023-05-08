@@ -6,8 +6,7 @@ import {
   filterAlerts
 } from './services/secretscanning'
 import {writeToFile} from './utils/utils'
-import { addToSummary, writeSummary } from './services/summary'
-//import { OrgSecurityManagers, SecurityManagerMembers, Users } from './api/securitymanagers'
+import { addToSummary, getSummaryMarkdown, writeSummary } from './services/summary'
 
 
 async function run(): Promise<void> {
@@ -41,6 +40,7 @@ async function run(): Promise<void> {
     addToSummary("New Alerts", newAlerts)
     addToSummary("Resolved Alerts", resolvedAlerts)
     writeSummary()
+    core.setOutput('summary-markdown', getSummaryMarkdown())
     core.debug('Summary written.')
 
 

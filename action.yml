@@ -29,6 +29,9 @@ inputs:
   enterprise:
     required: false
     description: "The enterprise to run the action on. Required if you run in on the enterprise level."
+outputs:
+  summary-markdown: 
+    description: "The markdown summary of the action."
  
 runs:
   using: "node16"

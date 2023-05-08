@@ -29,3 +29,7 @@ export function writeSummary(){
     core.summary.write()
     core.info(`[✅] Action summary written`)
 }
+
+export function getSummaryMarkdown(){
+    return core.summary.stringify()
+}
