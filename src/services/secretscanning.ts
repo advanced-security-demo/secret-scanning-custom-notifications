@@ -49,9 +49,9 @@ export async function filterAlerts(
 
   // Filter resolved alerts created after the minimum date and before the current date
   const resolvedAlertsResponse = alerts.filter(alert => {
-    if (alert.resolved_at != null && alert.status === 'resolved') {
+    if (alert.resolved_at != null && alert.state === 'resolved') {
       const resolved = new Date(alert.resolved_at)
-      alert.status === 'resolved'
+      alert.state === 'resolved'
       return resolved > minimumDate && resolved < new Date()
     }
   })

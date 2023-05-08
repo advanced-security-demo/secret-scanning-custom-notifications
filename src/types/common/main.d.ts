@@ -21,21 +21,8 @@ type SecretScanningAlert = {
   resolved_at: string | null
   url: string
   html_url: string
-  status: string
+  state: string
   secret_type: string
-  secret: {
-    name: string
-    created_at: string
-    updated_at: string
-    visibility: string
-  }
-  repository: {
-    name: string
-    full_name: string
-    owner: {
-      login: string
-    }
-  }
 }
 
 type RateLimitOptions = {

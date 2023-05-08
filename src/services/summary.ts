@@ -6,12 +6,12 @@ export function addToSummary(
   title: string,
   alerts: SecretScanningAlert[],
 ) {
-  const headers = ['Alert Number', 'Secret Name', 'Repository Name', 'HTML URL']
+  const headers = ['Alert Number', 'Secret State', 'Secret Type', 'HTML URL']
   // Define the table rows
   const rows = alerts.map(alert => [
     alert.number,
-    alert.secret.name,
-    alert.repository.name,
+    alert.state,
+    alert.secret_type,
     alert.html_url
   ])
 

@@ -13987,9 +13987,9 @@ async function filterAlerts(minimumDate, alerts) {
     });
     // Filter resolved alerts created after the minimum date and before the current date
     const resolvedAlertsResponse = alerts.filter(alert => {
-        if (alert.resolved_at != null && alert.status === 'resolved') {
+        if (alert.resolved_at != null && alert.state === 'resolved') {
             const resolved = new Date(alert.resolved_at);
-            alert.status === 'resolved';
+            alert.state === 'resolved';
             return resolved > minimumDate && resolved < new Date();
         }
     });
@@ -14032,12 +14032,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getSummaryMarkdown = exports.writeSummary = exports.addToSummary = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 function addToSummary(title, alerts) {
-    const headers = ['Alert Number', 'Secret Name', 'Repository Name', 'HTML URL'];
+    const headers = ['Alert Number', 'Secret State', 'Secret Type', 'HTML URL'];
     // Define the table rows
     const rows = alerts.map(alert => [
         alert.number,
-        alert.secret.name,
-        alert.repository.name,
+        alert.state,
+        alert.secret_type,
         alert.html_url
     ]);
     // Add the table to the Action summary
