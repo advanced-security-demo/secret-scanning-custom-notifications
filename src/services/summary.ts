@@ -9,7 +9,7 @@ export function addToSummary(
   const headers = ['Alert Number', 'Secret State', 'Secret Type', 'HTML URL']
   // Define the table rows
   const rows = alerts.map(alert => [
-    alert.number,
+    alert.number.toString(),
     alert.state,
     alert.secret_type,
     alert.html_url
