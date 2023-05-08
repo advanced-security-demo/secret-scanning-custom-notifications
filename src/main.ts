@@ -6,7 +6,7 @@ import {
   filterAlerts
 } from './services/secretscanning'
 import {writeToFile} from './utils/utils'
-import { OrgSecurityManagers, SecurityManagerMembers, Users } from './api/securitymanagers'
+//import { OrgSecurityManagers, SecurityManagerMembers, Users } from './api/securitymanagers'
 import { SummaryTableRow } from "@actions/core/lib/summary";
 
 async function run(): Promise<void> {
@@ -14,27 +14,6 @@ async function run(): Promise<void> {
     const inputs = await getInput()
     core.info(`[✅] Inputs parsed]`)
 
-    //Get Security Managers
-    const securityManagers = await OrgSecurityManagers(inputs)
-
-    //For each data element in Security managers object, get the members
-    securityManagers.forEach(async (team) => {
-        const members = await SecurityManagerMembers(inputs, team)
-        core.info(`[✅] Members retrieved for team ${members}`)
-        
-        const userEmails: { email: string }[] = []
-        for( const member of members){
-          const user = await Users(inputs, member.login)
-          core.info(`[✅] User retrieved for ${user.login}, ${user.email}`)
-          if(user.email != null){
-            userEmails.push({email : user.email} )
-          }
-        }
-        console.info(`JSON for users is ${JSON.stringify(userEmails)}`)
-        writeToFile("emails.json", JSON.stringify(userEmails))
-    })
-
-    core.info(`[✅] Security Managers and Members retrieved`)
     //Calculate date range
     const minimumDate = await calculateDateRange(inputs.frequency)
     core.info(`[✅] Date range calculated: ${minimumDate}`)
