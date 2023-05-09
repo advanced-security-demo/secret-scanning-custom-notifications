@@ -26,7 +26,7 @@ export const inputs = async (): Promise<inputsReturned> => {
       owner = process.env.GITHUB_ACTOR as string
       enterprise = process.env.GITHUB_ENTERPRISE as string
       new_alerts_filepath = process.env.CREATE_ALERTS_FILEPATH as string
-      closed_alerts_filepath = process.env.UPDATED_ALERTS_FILEPATH as string
+      closed_alerts_filepath = process.env.CLOSED_ALERTS_FILEPATH as string
     } else {
       //otherwise use the inputs from the action
       frequency = Number(core.getInput('frequency'))

@@ -23,7 +23,7 @@ To use this action, add the following step to your workflow:
 
 ```yaml
 - name: Secret Scanning Alerts
-  uses: username/repo-name@v1
+  uses: advanced-security/secret-scanning-custom-notifications/@v1
   with:
     frequency: 24 # hours
     scope: 'repository'
@@ -68,7 +68,7 @@ jobs:
 
     steps:
     - name: Secret Scanning Alerts
-      uses: username/repo-name@v1
+      uses: advanced-security/secret-scanning-custom-notifications/@v1
       with:
         frequency: 3000
         scope: 'repository'
@@ -98,3 +98,8 @@ jobs:
     
 ## License
 This project is distributed under the [MIT license](LICENSE.md).
+
+## Contributing
+- Fork this repo 
+- Work on your new feature
+- Create new Pull Request
