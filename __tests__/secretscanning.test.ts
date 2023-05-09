@@ -1,11 +1,9 @@
-import * as core from '@actions/core'
 import {
   getSecretScanningAlertsForScope,
   filterAlerts
 } from '../src/services/secretscanning'
 import {
   inputsReturned,
-  scopeInput,
   SecretScanningAlert
 } from '../src/types/common'
 import {fetchSecretScanningAlerts} from '../src/api/secretscanningalerts'
