@@ -1,4 +1,5 @@
-export {inputsReturned, scopeInput, SecretScanningAlert, RateLimitOptions, SecurityManagerTeam, Member}
+export {inputsReturned, scopeInput, SecretScanningAlert, RateLimitOptions
+}
 
 type inputsReturned = {
   frequency: number
@@ -29,13 +30,4 @@ type RateLimitOptions = {
   request: {
     retryCount: number
   }
-}
-
-type SecurityManagerTeam = {
-  slug : string
-}
-
-type Member = {
- login : string, 
- email : string 
 }

@@ -13709,143 +13709,47 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EnterpriseSecretScanningAlerts = exports.OrgSecretScanningAlerts = exports.RepoSecretScanningAlerts = void 0;
+exports.fetchSecretScanningAlerts = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const myoctokit_1 = __nccwpck_require__(7543);
-const RepoSecretScanningAlerts = async (input) => {
+async function fetchSecretScanningAlerts(input) {
     let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /repos/{owner}/{repo}/secret-scanning/alerts', {
-            owner: input.owner,
-            repo: input.repo,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
+    const options = getOptions(input);
+    const octokit = new myoctokit_1.MyOctokit(input);
+    const iterator = await octokit.paginate(options.url, options);
+    res = iterator;
     return res;
-};
-exports.RepoSecretScanningAlerts = RepoSecretScanningAlerts;
-const OrgSecretScanningAlerts = async (input) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /orgs/{org}/secret-scanning/alerts', {
-            org: input.owner,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
+}
+exports.fetchSecretScanningAlerts = fetchSecretScanningAlerts;
+function getOptions(input) {
+    switch (input.scope) {
+        case 'repository':
+            return {
+                method: 'GET',
+                url: 'GET /repos/{owner}/{repo}/secret-scanning/alerts',
+                owner: input.owner,
+                repo: input.repo,
+                per_page: 100
+            };
+        case 'organisation':
+            return {
+                method: 'GET',
+                url: 'GET /orgs/{org}/secret-scanning/alerts',
+                org: input.owner,
+                per_page: 100
+            };
+        case 'enterprise':
+            return {
+                method: 'GET',
+                url: 'GET /enterprises/{enterprise}/secret-scanning/alerts',
+                enterprise: input.enterprise,
+                per_page: 100
+            };
+        default:
+            core.info(`[❌] Invalid scope: ${input.scope}`);
+            throw new Error('Invalid scope');
     }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.OrgSecretScanningAlerts = OrgSecretScanningAlerts;
-const EnterpriseSecretScanningAlerts = async (input) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /enterprises/{enterprise}/secret-scanning/alerts', {
-            enterprise: input.enterprise,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.EnterpriseSecretScanningAlerts = EnterpriseSecretScanningAlerts;
-
-
-/***/ }),
-
-/***/ 5132:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Users = exports.SecurityManagerMembers = exports.OrgSecurityManagers = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const myoctokit_1 = __nccwpck_require__(7543);
-const OrgSecurityManagers = async (input) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.orgs.listSecurityManagerTeams({ org: input.owner });
-        res = iterator.data;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.OrgSecurityManagers = OrgSecurityManagers;
-const SecurityManagerMembers = async (input, team) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /orgs/{org}/teams/{team_slug}/members', {
-            org: input.owner,
-            team_slug: team.slug,
-            per_page: 100
-        }, response => { return response.data; });
-        res = iterator;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.SecurityManagerMembers = SecurityManagerMembers;
-const Users = async (input, username) => {
-    let res = {};
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.users.getByUsername({ username: username });
-        res = iterator.data;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.Users = Users;
+}
 
 
 /***/ }),
@@ -13949,38 +13853,30 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.filterAlerts = exports.getSecurityManagersForScope = exports.getSecretScanningAlertsForScope = void 0;
-const core = __importStar(__nccwpck_require__(2186));
+exports.filterAlerts = exports.getSecretScanningAlertsForScope = void 0;
 const secretscanningalerts_1 = __nccwpck_require__(5944);
-const securitymanagers_1 = __nccwpck_require__(5132);
+const core = __importStar(__nccwpck_require__(2186));
 async function getSecretScanningAlertsForScope(input) {
     let res = [];
-    if (input.scope === 'repository') {
-        res = await (0, secretscanningalerts_1.RepoSecretScanningAlerts)(input);
+    try {
+        res = await (0, secretscanningalerts_1.fetchSecretScanningAlerts)(input);
+        return res;
     }
-    else if (input.scope === 'organisation') {
-        res = await (0, secretscanningalerts_1.OrgSecretScanningAlerts)(input);
-    }
-    else if (input.scope === 'enterprise') {
-        res = await (0, secretscanningalerts_1.EnterpriseSecretScanningAlerts)(input);
-    }
-    else {
-        core.info(`[❌] Scope is invalid`);
+    catch (error) {
+        if (error instanceof Error) {
+            core.debug(`Error with fatching alerts from the API.: ${error}`);
+            core.setFailed('Error: There was an error fetching the alerts from the API. Please check the logs.');
+            throw new Error(error.message);
+        }
     }
     return res;
 }
 exports.getSecretScanningAlertsForScope = getSecretScanningAlertsForScope;
-async function getSecurityManagersForScope(input) {
-    let res = [];
-    res = await (0, securitymanagers_1.OrgSecurityManagers)(input);
-    return res;
-}
-exports.getSecurityManagersForScope = getSecurityManagersForScope;
 // filter the alerts based on the minimum date and current date and by status (new or resolved) and return in two objects
 async function filterAlerts(minimumDate, alerts) {
     // Filter new alerts created after the minimum date and before the current date
     const newAlertsResponse = alerts.filter(alert => {
-        if (alert.created_at != null) {
+        if (alert.created_at != null && alert.state === 'open') {
             const created = new Date(alert.created_at);
             return created > minimumDate && created < new Date();
         }
@@ -14109,7 +14005,6 @@ const inputs = async () => {
         let enterprise = '';
         let new_alerts_filepath;
         let closed_alerts_filepath;
-        let github_action;
         //if the env LOCAL_DEV is set to true, then use the .env file
         if (process.env.LOCAL_DEV === 'true') {
             frequency = Number(process.env.FREQUENCY);
@@ -14121,7 +14016,6 @@ const inputs = async () => {
             enterprise = process.env.GITHUB_ENTERPRISE;
             new_alerts_filepath = process.env.CREATE_ALERTS_FILEPATH;
             closed_alerts_filepath = process.env.UPDATED_ALERTS_FILEPATH;
-            github_action = process.env.GITHUB_ACTION;
         }
         else {
             //otherwise use the inputs from the action

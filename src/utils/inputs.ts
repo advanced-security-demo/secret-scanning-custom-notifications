@@ -16,7 +16,6 @@ export const inputs = async (): Promise<inputsReturned> => {
     let enterprise = ''
     let new_alerts_filepath: string
     let closed_alerts_filepath: string
-    let github_action : string
     //if the env LOCAL_DEV is set to true, then use the .env file
     if (process.env.LOCAL_DEV === 'true') {
       frequency = Number(process.env.FREQUENCY)
@@ -28,7 +27,6 @@ export const inputs = async (): Promise<inputsReturned> => {
       enterprise = process.env.GITHUB_ENTERPRISE as string
       new_alerts_filepath = process.env.CREATE_ALERTS_FILEPATH as string
       closed_alerts_filepath = process.env.UPDATED_ALERTS_FILEPATH as string
-      github_action = process.env.GITHUB_ACTION as string
     } else {
       //otherwise use the inputs from the action
       frequency = Number(core.getInput('frequency'))

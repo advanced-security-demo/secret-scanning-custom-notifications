@@ -1,38 +1,26 @@
-import * as core from '@actions/core'
-import type {SecurityManagerTeam, inputsReturned} from '../types/common/main'
-import {
-  OrgSecretScanningAlerts,
-  RepoSecretScanningAlerts,
-  EnterpriseSecretScanningAlerts
-} from '../api/secretscanningalerts'
+import type {inputsReturned} from '../types/common/main'
+import {fetchSecretScanningAlerts} from '../api/secretscanningalerts'
 import {SecretScanningAlert} from '../types/common/main'
-import { OrgSecurityManagers } from '../api/securitymanagers'
+import * as core from '@actions/core'
 
 export async function getSecretScanningAlertsForScope(
   input: inputsReturned
 ): Promise<SecretScanningAlert[]> {
   let res: SecretScanningAlert[] = []
-  if (input.scope === 'repository') {
-    res = await RepoSecretScanningAlerts(input)
-  } else if (input.scope === 'organisation') {
-    res = await OrgSecretScanningAlerts(input)
-  } else if (input.scope === 'enterprise') {
-    res = await EnterpriseSecretScanningAlerts(input)
-  } else {
-    core.info(`[❌] Scope is invalid`)
+  try {
+    res = await fetchSecretScanningAlerts(input)
+    return res
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      core.debug(`Error with fatching alerts from the API.: ${error}`)
+      core.setFailed(
+        'Error: There was an error fetching the alerts from the API. Please check the logs.'
+      )
+      throw new Error(error.message)
+    }
   }
   return res
 }
-
-export async function getSecurityManagersForScope( 
-  input: inputsReturned 
-  ): Promise<SecurityManagerTeam[]> {
-  let res: SecurityManagerTeam[] = [] 
-  res = await OrgSecurityManagers(input)
-  return res
-  }  
-
-
 
 // filter the alerts based on the minimum date and current date and by status (new or resolved) and return in two objects
 export async function filterAlerts(
@@ -41,7 +29,7 @@ export async function filterAlerts(
 ): Promise<SecretScanningAlert[][]> {
   // Filter new alerts created after the minimum date and before the current date
   const newAlertsResponse = alerts.filter(alert => {
-    if (alert.created_at != null) {
+    if (alert.created_at != null && alert.state === 'open') {
       const created = new Date(alert.created_at)
       return created > minimumDate && created < new Date()
     }
