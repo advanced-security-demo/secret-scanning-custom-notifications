@@ -14015,7 +14015,7 @@ const inputs = async () => {
             owner = process.env.GITHUB_ACTOR;
             enterprise = process.env.GITHUB_ENTERPRISE;
             new_alerts_filepath = process.env.CREATE_ALERTS_FILEPATH;
-            closed_alerts_filepath = process.env.UPDATED_ALERTS_FILEPATH;
+            closed_alerts_filepath = process.env.CLOSED_ALERTS_FILEPATH;
         }
         else {
             //otherwise use the inputs from the action
