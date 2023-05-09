@@ -13717,7 +13717,6 @@ async function fetchSecretScanningAlerts(input) {
     const options = getOptions(input);
     const octokit = new myoctokit_1.MyOctokit(input);
     const iterator = await octokit.paginate(options.url, options);
-    console.log(iterator);
     res = iterator;
     return res;
 }
@@ -13792,28 +13791,32 @@ const utils_2 = __nccwpck_require__(239);
 const summary_1 = __nccwpck_require__(7866);
 async function run() {
     try {
+        // Get inputs
         const inputs = await (0, inputs_1.inputs)();
         core.info(`[✅] Inputs parsed`);
-        //Calculate date range
+        // Calculate date range
         const minimumDate = await (0, utils_1.calculateDateRange)(inputs.frequency);
         core.info(`[✅] Date range calculated: ${minimumDate}`);
-        //Get the alerts for the scope provided
+        // Get the alerts for the scope provided
         const alerts = await (0, secretscanning_1.getSecretScanningAlertsForScope)(inputs);
         // Filter new alerts created after the minimum date and before the current date
         const [newAlerts, resolvedAlerts] = await (0, secretscanning_1.filterAlerts)(minimumDate, alerts);
         // Log filtered resolved alerts
         core.debug(`The filtered resolved alrets is ${JSON.stringify(resolvedAlerts)}`);
         core.debug(`The filtered new alerts is ${JSON.stringify(newAlerts)}`);
+        core.info(`[✅] Alerts parsed`);
         // Save newAlerts and resolvedAlerts to file
         (0, utils_2.writeToFile)(inputs.new_alerts_filepath, JSON.stringify(newAlerts));
         (0, utils_2.writeToFile)(inputs.closed_alerts_filepath, JSON.stringify(resolvedAlerts));
-        core.debug('New alerts JSON data is saved.');
-        // Print them as Action summary output
-        (0, summary_1.addToSummary)("New Alerts", newAlerts);
-        (0, summary_1.addToSummary)("Resolved Alerts", resolvedAlerts);
-        (0, summary_1.writeSummary)();
+        core.info(`[✅] Alerts saved to files`);
+        // Print results as Action summary and set it as `summary-markdown` output
+        if (process.env.LOCAL_DEV !== 'true') {
+            (0, summary_1.addToSummary)("New Alerts", newAlerts);
+            (0, summary_1.addToSummary)("Resolved Alerts", resolvedAlerts);
+            (0, summary_1.writeSummary)();
+        }
         core.setOutput('summary-markdown', (0, summary_1.getSummaryMarkdown)());
-        core.debug('Summary written.');
+        core.info(`[✅] Summary output completed`);
     }
     catch (error) {
         if (error instanceof Error)
@@ -14013,9 +14016,9 @@ const inputs = async () => {
             api_token = process.env.GITHUB_TOKEN;
             apiURL = process.env.GITHUB_API_URL;
             repo = process.env.GITHUB_REPOSITORY;
-            owner = process.env.GITHUB_ACTOR;
+            owner = process.env.GITHUB_OWNER;
             enterprise = process.env.GITHUB_ENTERPRISE;
-            new_alerts_filepath = process.env.CREATE_ALERTS_FILEPATH;
+            new_alerts_filepath = process.env.CREATED_ALERTS_FILEPATH;
             closed_alerts_filepath = process.env.CLOSED_ALERTS_FILEPATH;
         }
         else {
