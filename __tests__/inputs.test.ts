@@ -8,10 +8,10 @@ describe("inputs", () => {
     process.env.GITHUB_TOKEN = "test-token";
     process.env.GITHUB_API_URL = "https://test-api-url.com";
     process.env.GITHUB_REPOSITORY = "test-repo";
-    process.env.GITHUB_ACTOR = "test-owner";
+    process.env.GITHUB_OWNER = "test-owner";
     process.env.GITHUB_ENTERPRISE = "test-enterprise";
-    process.env.CREATE_ALERTS_FILEPATH = "test-new-alerts-filepath";
-    process.env.UPDATED_ALERTS_FILEPATH = "test-closed-alerts-filepath";
+    process.env.CREATED_ALERTS_FILEPATH = "test-new-alerts-filepath";
+    process.env.CLOSED_ALERTS_FILEPATH = "test-closed-alerts-filepath";
 
     const result = await inputs();
     expect(result).toHaveProperty("scope", "org");
@@ -32,8 +32,8 @@ describe("inputs", () => {
     delete process.env.GITHUB_REPOSITORY;
     delete process.env.GITHUB_ACTOR;
     delete process.env.GITHUB_ENTERPRISE;
-    delete process.env.CREATE_ALERTS_FILEPATH;
-    delete process.env.UPDATED_ALERTS_FILEPATH;
+    delete process.env.CREATED_ALERTS_FILEPATH;
+    delete process.env.CLOSED_ALERTS_FILEPATH;
   });
 
   it("should throw an error if frequency is not a number", async () => {

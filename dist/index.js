@@ -13717,6 +13717,7 @@ async function fetchSecretScanningAlerts(input) {
     const options = getOptions(input);
     const octokit = new myoctokit_1.MyOctokit(input);
     const iterator = await octokit.paginate(options.url, options);
+    console.log(iterator);
     res = iterator;
     return res;
 }
@@ -13726,7 +13727,7 @@ function getOptions(input) {
         case 'repository':
             return {
                 method: 'GET',
-                url: 'GET /repos/{owner}/{repo}/secret-scanning/alerts',
+                url: '/repos/{owner}/{repo}/secret-scanning/alerts',
                 owner: input.owner,
                 repo: input.repo,
                 per_page: 100
@@ -13734,14 +13735,14 @@ function getOptions(input) {
         case 'organisation':
             return {
                 method: 'GET',
-                url: 'GET /orgs/{org}/secret-scanning/alerts',
+                url: '/orgs/{org}/secret-scanning/alerts',
                 org: input.owner,
                 per_page: 100
             };
         case 'enterprise':
             return {
                 method: 'GET',
-                url: 'GET /enterprises/{enterprise}/secret-scanning/alerts',
+                url: '/enterprises/{enterprise}/secret-scanning/alerts',
                 enterprise: input.enterprise,
                 per_page: 100
             };

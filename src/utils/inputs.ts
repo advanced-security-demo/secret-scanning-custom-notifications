@@ -23,9 +23,9 @@ export const inputs = async (): Promise<inputsReturned> => {
       api_token = process.env.GITHUB_TOKEN as string
       apiURL = process.env.GITHUB_API_URL as string
       repo = process.env.GITHUB_REPOSITORY as string
-      owner = process.env.GITHUB_ACTOR as string
+      owner = process.env.GITHUB_OWNER as string
       enterprise = process.env.GITHUB_ENTERPRISE as string
-      new_alerts_filepath = process.env.CREATE_ALERTS_FILEPATH as string
+      new_alerts_filepath = process.env.CREATED_ALERTS_FILEPATH as string
       closed_alerts_filepath = process.env.CLOSED_ALERTS_FILEPATH as string
     } else {
       //otherwise use the inputs from the action
