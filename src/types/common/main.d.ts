@@ -1,5 +1,4 @@
-export {inputsReturned, scopeInput, SecretScanningAlert, RateLimitOptions
-}
+export {inputsReturned, scopeInput, SecretScanningAlert, RateLimitOptions}
 
 type inputsReturned = {
   frequency: number

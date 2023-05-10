@@ -6,8 +6,11 @@ import {
   filterAlerts
 } from './services/secretscanning'
 import {writeToFile} from './utils/utils'
-import { addToSummary, getSummaryMarkdown, writeSummary } from './services/summary'
-
+import {
+  addToSummary,
+  getSummaryMarkdown,
+  writeSummary
+} from './services/summary'
 
 async function run(): Promise<void> {
   try {
@@ -36,18 +39,15 @@ async function run(): Promise<void> {
     writeToFile(inputs.new_alerts_filepath, JSON.stringify(newAlerts))
     writeToFile(inputs.closed_alerts_filepath, JSON.stringify(resolvedAlerts))
     core.info(`[✅] Alerts saved to files`)
-    
-    
+
     // Print results as Action summary and set it as `summary-markdown` output
-    if(process.env.LOCAL_DEV !== 'true'){
-      addToSummary("New Alerts", newAlerts)
-      addToSummary("Resolved Alerts", resolvedAlerts)
+    if (process.env.LOCAL_DEV !== 'true') {
+      addToSummary('New Alerts', newAlerts)
+      addToSummary('Resolved Alerts', resolvedAlerts)
       writeSummary()
     }
     core.setOutput('summary-markdown', getSummaryMarkdown())
     core.info(`[✅] Summary output completed`)
-
-
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
