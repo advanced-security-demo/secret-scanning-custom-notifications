@@ -169,8 +169,8 @@ async function run() {
         core.info(`[✅] Alerts saved to files`);
         // Print results as Action summary and set it as `summary-markdown` output
         if (process.env.LOCAL_DEV !== 'true') {
-            (0, summary_1.addToSummary)("New Alerts", newAlerts);
-            (0, summary_1.addToSummary)("Resolved Alerts", resolvedAlerts);
+            (0, summary_1.addToSummary)('New Alerts', newAlerts);
+            (0, summary_1.addToSummary)('Resolved Alerts', resolvedAlerts);
             (0, summary_1.writeSummary)();
         }
         core.setOutput('summary-markdown', (0, summary_1.getSummaryMarkdown)());
