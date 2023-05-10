@@ -2,72 +2,42 @@ import * as core from '@actions/core'
 import {SecretScanningAlert, inputsReturned} from '../types/common/main'
 import {MyOctokit} from './myoctokit'
 
-export const RepoSecretScanningAlerts = async (
-  input: inputsReturned
-): Promise<SecretScanningAlert[]> => {
+export async function fetchSecretScanningAlerts(input: inputsReturned) {
   let res: SecretScanningAlert[] = []
-  try {
-    const octokit = new MyOctokit(input)
-    const iterator = await octokit.paginate(
-      'GET /repos/{owner}/{repo}/secret-scanning/alerts',
-      {
+  const options = getOptions(input)
+  const octokit = new MyOctokit(input)
+  const iterator = await octokit.paginate(options.url, options)
+  res = iterator as SecretScanningAlert[]
+
+  return res
+}
+
+function getOptions(input: inputsReturned) {
+  switch (input.scope) {
+    case 'repository':
+      return {
+        method: 'GET',
+        url: '/repos/{owner}/{repo}/secret-scanning/alerts',
         owner: input.owner,
         repo: input.repo,
         per_page: 100
-      },
-      response => {
-        return response.data
       }
-    )
-    res = iterator as unknown as SecretScanningAlert[]
-  } catch (error) {
-    core.setFailed(`There was an error. Please check the logs${error}`)
-  }
-  return res
-}
-
-export const OrgSecretScanningAlerts = async (
-  input: inputsReturned
-): Promise<SecretScanningAlert[]> => {
-  let res: SecretScanningAlert[] = []
-  try {
-    const octokit = new MyOctokit(input)
-    const iterator = await octokit.paginate(
-      'GET /orgs/{org}/secret-scanning/alerts',
-      {
+    case 'organisation':
+      return {
+        method: 'GET',
+        url: '/orgs/{org}/secret-scanning/alerts',
         org: input.owner,
         per_page: 100
-      },
-      response => {
-        return response.data
       }
-    )
-    res = iterator as unknown as SecretScanningAlert[]
-  } catch (error) {
-    core.setFailed(`There was an error. Please check the logs${error}`)
-  }
-  return res
-}
-
-export const EnterpriseSecretScanningAlerts = async (
-  input: inputsReturned
-): Promise<SecretScanningAlert[]> => {
-  let res: SecretScanningAlert[] = []
-  try {
-    const octokit = new MyOctokit(input)
-    const iterator = await octokit.paginate(
-      'GET /enterprises/{enterprise}/secret-scanning/alerts',
-      {
+    case 'enterprise':
+      return {
+        method: 'GET',
+        url: '/enterprises/{enterprise}/secret-scanning/alerts',
         enterprise: input.enterprise,
         per_page: 100
-      },
-      response => {
-        return response.data
       }
-    )
-    res = iterator as unknown as SecretScanningAlert[]
-  } catch (error) {
-    core.setFailed(`There was an error. Please check the logs${error}`)
+    default:
+      core.info(`[❌] Invalid scope: ${input.scope}`)
+      throw new Error('Invalid scope')
   }
-  return res
 }

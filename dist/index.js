@@ -13709,64 +13709,47 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.EnterpriseSecretScanningAlerts = exports.OrgSecretScanningAlerts = exports.RepoSecretScanningAlerts = void 0;
+exports.fetchSecretScanningAlerts = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const myoctokit_1 = __nccwpck_require__(7543);
-const RepoSecretScanningAlerts = async (input) => {
+async function fetchSecretScanningAlerts(input) {
     let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /repos/{owner}/{repo}/secret-scanning/alerts', {
-            owner: input.owner,
-            repo: input.repo,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
+    const options = getOptions(input);
+    const octokit = new myoctokit_1.MyOctokit(input);
+    const iterator = await octokit.paginate(options.url, options);
+    res = iterator;
     return res;
-};
-exports.RepoSecretScanningAlerts = RepoSecretScanningAlerts;
-const OrgSecretScanningAlerts = async (input) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /orgs/{org}/secret-scanning/alerts', {
-            org: input.owner,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
+}
+exports.fetchSecretScanningAlerts = fetchSecretScanningAlerts;
+function getOptions(input) {
+    switch (input.scope) {
+        case 'repository':
+            return {
+                method: 'GET',
+                url: '/repos/{owner}/{repo}/secret-scanning/alerts',
+                owner: input.owner,
+                repo: input.repo,
+                per_page: 100
+            };
+        case 'organisation':
+            return {
+                method: 'GET',
+                url: '/orgs/{org}/secret-scanning/alerts',
+                org: input.owner,
+                per_page: 100
+            };
+        case 'enterprise':
+            return {
+                method: 'GET',
+                url: '/enterprises/{enterprise}/secret-scanning/alerts',
+                enterprise: input.enterprise,
+                per_page: 100
+            };
+        default:
+            core.info(`[❌] Invalid scope: ${input.scope}`);
+            throw new Error('Invalid scope');
     }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.OrgSecretScanningAlerts = OrgSecretScanningAlerts;
-const EnterpriseSecretScanningAlerts = async (input) => {
-    let res = [];
-    try {
-        const octokit = new myoctokit_1.MyOctokit(input);
-        const iterator = await octokit.paginate('GET /enterprises/{enterprise}/secret-scanning/alerts', {
-            enterprise: input.enterprise,
-            per_page: 100
-        }, response => {
-            return response.data;
-        });
-        res = iterator;
-    }
-    catch (error) {
-        core.setFailed(`There was an error. Please check the logs${error}`);
-    }
-    return res;
-};
-exports.EnterpriseSecretScanningAlerts = EnterpriseSecretScanningAlerts;
+}
 
 
 /***/ }),
@@ -13805,24 +13788,35 @@ const inputs_1 = __nccwpck_require__(9378);
 const utils_1 = __nccwpck_require__(239);
 const secretscanning_1 = __nccwpck_require__(3417);
 const utils_2 = __nccwpck_require__(239);
+const summary_1 = __nccwpck_require__(7866);
 async function run() {
     try {
+        // Get inputs
         const inputs = await (0, inputs_1.inputs)();
-        core.info(`[✅] Inputs parsed]`);
-        //Calculate date range
+        core.info(`[✅] Inputs parsed`);
+        // Calculate date range
         const minimumDate = await (0, utils_1.calculateDateRange)(inputs.frequency);
         core.info(`[✅] Date range calculated: ${minimumDate}`);
-        //Get the alerts for the scope provided
+        // Get the alerts for the scope provided
         const alerts = await (0, secretscanning_1.getSecretScanningAlertsForScope)(inputs);
         // Filter new alerts created after the minimum date and before the current date
         const [newAlerts, resolvedAlerts] = await (0, secretscanning_1.filterAlerts)(minimumDate, alerts);
         // Log filtered resolved alerts
         core.debug(`The filtered resolved alrets is ${JSON.stringify(resolvedAlerts)}`);
         core.debug(`The filtered new alerts is ${JSON.stringify(newAlerts)}`);
+        core.info(`[✅] Alerts parsed`);
         // Save newAlerts and resolvedAlerts to file
-        (0, utils_2.writeToFile)('newAlerts.json', JSON.stringify(newAlerts));
-        (0, utils_2.writeToFile)('resolvedAlerts.json', JSON.stringify(resolvedAlerts));
-        core.debug('New alerts JSON data is saved.');
+        (0, utils_2.writeToFile)(inputs.new_alerts_filepath, JSON.stringify(newAlerts));
+        (0, utils_2.writeToFile)(inputs.closed_alerts_filepath, JSON.stringify(resolvedAlerts));
+        core.info(`[✅] Alerts saved to files`);
+        // Print results as Action summary and set it as `summary-markdown` output
+        if (process.env.LOCAL_DEV !== 'true') {
+            (0, summary_1.addToSummary)("New Alerts", newAlerts);
+            (0, summary_1.addToSummary)("Resolved Alerts", resolvedAlerts);
+            (0, summary_1.writeSummary)();
+        }
+        core.setOutput('summary-markdown', (0, summary_1.getSummaryMarkdown)());
+        core.info(`[✅] Summary output completed`);
     }
     catch (error) {
         if (error instanceof Error)
@@ -13864,21 +13858,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.filterAlerts = exports.getSecretScanningAlertsForScope = void 0;
-const core = __importStar(__nccwpck_require__(2186));
 const secretscanningalerts_1 = __nccwpck_require__(5944);
+const core = __importStar(__nccwpck_require__(2186));
 async function getSecretScanningAlertsForScope(input) {
     let res = [];
-    if (input.scope === 'repository') {
-        res = await (0, secretscanningalerts_1.RepoSecretScanningAlerts)(input);
+    try {
+        res = await (0, secretscanningalerts_1.fetchSecretScanningAlerts)(input);
+        return res;
     }
-    else if (input.scope === 'organisation') {
-        res = await (0, secretscanningalerts_1.OrgSecretScanningAlerts)(input);
-    }
-    else if (input.scope === 'enterprise') {
-        res = await (0, secretscanningalerts_1.EnterpriseSecretScanningAlerts)(input);
-    }
-    else {
-        core.info(`[❌] Scope is invalid`);
+    catch (error) {
+        if (error instanceof Error) {
+            core.debug(`Error with fatching alerts from the API.: ${error}`);
+            core.setFailed('Error: There was an error fetching the alerts from the API. Please check the logs.');
+            throw new Error(error.message);
+        }
     }
     return res;
 }
@@ -13887,22 +13880,85 @@ exports.getSecretScanningAlertsForScope = getSecretScanningAlertsForScope;
 async function filterAlerts(minimumDate, alerts) {
     // Filter new alerts created after the minimum date and before the current date
     const newAlertsResponse = alerts.filter(alert => {
-        if (alert.created_at != null) {
+        if (alert.created_at != null && alert.state === 'open') {
             const created = new Date(alert.created_at);
             return created > minimumDate && created < new Date();
         }
     });
     // Filter resolved alerts created after the minimum date and before the current date
     const resolvedAlertsResponse = alerts.filter(alert => {
-        if (alert.resolved_at != null && alert.status === 'resolved') {
+        if (alert.resolved_at != null && alert.state === 'resolved') {
             const resolved = new Date(alert.resolved_at);
-            alert.status === 'resolved';
+            alert.state === 'resolved';
             return resolved > minimumDate && resolved < new Date();
         }
     });
     return [newAlertsResponse, resolvedAlertsResponse];
 }
 exports.filterAlerts = filterAlerts;
+
+
+/***/ }),
+
+/***/ 7866:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getSummaryMarkdown = exports.writeSummary = exports.addToSummary = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+function addToSummary(title, alerts) {
+    const headers = ['Alert Number', 'Secret State', 'Secret Type', 'HTML URL'];
+    // Define the table rows
+    const rows = alerts.map(alert => [
+        alert.number.toString(),
+        alert.state,
+        alert.secret_type,
+        alert.html_url
+    ]);
+    // Add the table to the Action summary
+    core.summary
+        .addHeading(title)
+        .addTable([
+        headers.map(header => ({ data: header, header: true })),
+        ...rows
+    ])
+        .addBreak();
+}
+exports.addToSummary = addToSummary;
+function writeSummary() {
+    core.summary.write();
+    core.info(`[✅] Action summary written`);
+}
+exports.writeSummary = writeSummary;
+function getSummaryMarkdown() {
+    return core.summary.stringify();
+}
+exports.getSummaryMarkdown = getSummaryMarkdown;
 
 
 /***/ }),
@@ -13948,9 +14004,11 @@ const inputs = async () => {
         let scope;
         let api_token;
         let apiURL;
-        let repo = "";
-        let owner = "";
-        let enterprise = "";
+        let repo = '';
+        let owner = '';
+        let enterprise = '';
+        let new_alerts_filepath;
+        let closed_alerts_filepath;
         //if the env LOCAL_DEV is set to true, then use the .env file
         if (process.env.LOCAL_DEV === 'true') {
             frequency = Number(process.env.FREQUENCY);
@@ -13958,18 +14016,22 @@ const inputs = async () => {
             api_token = process.env.GITHUB_TOKEN;
             apiURL = process.env.GITHUB_API_URL;
             repo = process.env.GITHUB_REPOSITORY;
-            owner = process.env.GITHUB_ACTOR;
+            owner = process.env.GITHUB_OWNER;
             enterprise = process.env.GITHUB_ENTERPRISE;
+            new_alerts_filepath = process.env.CREATED_ALERTS_FILEPATH;
+            closed_alerts_filepath = process.env.CLOSED_ALERTS_FILEPATH;
         }
         else {
             //otherwise use the inputs from the action
             frequency = Number(core.getInput('frequency'));
             scope = core.getInput('scope');
             api_token = core.getInput('token');
-            apiURL = core.getInput('api_url');
+            apiURL = core.getInput('api_url') || github.context.apiUrl;
             repo = core.getInput('repo') || github.context.repo.repo;
             owner = core.getInput('owner') || github.context.repo.owner;
             enterprise = core.getInput('enterprise');
+            new_alerts_filepath = core.getInput('new_alerts_filepath');
+            closed_alerts_filepath = core.getInput('closed_alerts_filepath');
         }
         return {
             frequency,
@@ -13978,7 +14040,9 @@ const inputs = async () => {
             apiURL,
             repo,
             owner,
-            enterprise
+            enterprise,
+            new_alerts_filepath,
+            closed_alerts_filepath
         };
     }
     catch (error) {
@@ -14046,7 +14110,6 @@ async function calculateDateRange(frequency) {
 }
 exports.calculateDateRange = calculateDateRange;
 function writeToFile(fileName, data) {
-    //fs.writeFile(fileName, data))
     fs_1.default.writeFile(fileName, data, err => {
         if (err) {
             throw err;

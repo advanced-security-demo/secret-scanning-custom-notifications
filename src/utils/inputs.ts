@@ -2,19 +2,20 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import type {scopeInput, inputsReturned} from '../types/common/main'
-import * as dotenv from "dotenv";
-dotenv.config();
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 export const inputs = async (): Promise<inputsReturned> => {
   try {
-    
-    let frequency: number;
-    let scope: scopeInput;
-    let api_token: string;
-    let apiURL: string;
-    let repo = "";
-    let owner = "";
-    let enterprise = "";
+    let frequency: number
+    let scope: scopeInput
+    let api_token: string
+    let apiURL: string
+    let repo = ''
+    let owner = ''
+    let enterprise = ''
+    let new_alerts_filepath: string
+    let closed_alerts_filepath: string
     //if the env LOCAL_DEV is set to true, then use the .env file
     if (process.env.LOCAL_DEV === 'true') {
       frequency = Number(process.env.FREQUENCY)
@@ -22,17 +23,21 @@ export const inputs = async (): Promise<inputsReturned> => {
       api_token = process.env.GITHUB_TOKEN as string
       apiURL = process.env.GITHUB_API_URL as string
       repo = process.env.GITHUB_REPOSITORY as string
-      owner = process.env.GITHUB_ACTOR as string
+      owner = process.env.GITHUB_OWNER as string
       enterprise = process.env.GITHUB_ENTERPRISE as string
+      new_alerts_filepath = process.env.CREATED_ALERTS_FILEPATH as string
+      closed_alerts_filepath = process.env.CLOSED_ALERTS_FILEPATH as string
     } else {
       //otherwise use the inputs from the action
       frequency = Number(core.getInput('frequency'))
       scope = core.getInput('scope') as scopeInput
       api_token = core.getInput('token')
-      apiURL = core.getInput('api_url')
+      apiURL = core.getInput('api_url') || github.context.apiUrl
       repo = core.getInput('repo') || github.context.repo.repo
       owner = core.getInput('owner') || github.context.repo.owner
       enterprise = core.getInput('enterprise')
+      new_alerts_filepath = core.getInput('new_alerts_filepath')
+      closed_alerts_filepath = core.getInput('closed_alerts_filepath')
     }
     return {
       frequency,
@@ -41,7 +46,9 @@ export const inputs = async (): Promise<inputsReturned> => {
       apiURL,
       repo,
       owner,
-      enterprise
+      enterprise,
+      new_alerts_filepath,
+      closed_alerts_filepath
     }
   } catch (error: unknown) {
     if (error instanceof Error) {

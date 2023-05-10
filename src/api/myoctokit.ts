@@ -16,7 +16,7 @@ export class MyOctokit extends Octokit {
             return true
           }
         },
-        onSecondaryRateLimit: (retryAfter: any, options: any , octokit:any) => {
+        onSecondaryRateLimit: (retryAfter: any, options: any, octokit: any) => {
           octokit.log.warn(
             `Secondary rate limit for request ${options.method} ${options.url}`
           )

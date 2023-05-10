@@ -11,6 +11,12 @@ inputs:
   token:
     required: true
     description: "The GitHub API token to use for the action."
+  new_alerts_filepath:
+    required: true
+    description: "The path to the file where the new alerts should be stored for email attachment."
+  closed_alerts_filepath:
+    required: true
+    description: "The path to the file where the closed alerts should be stored for email attachment."  
   api_url:
     required: false
     description: "The GitHub API URL to use for the action. Needed only if you are using GitHub Enterprise Server."
@@ -23,7 +29,10 @@ inputs:
   enterprise:
     required: false
     description: "The enterprise to run the action on. Required if you run in on the enterprise level."
-  
+outputs:
+  summary-markdown: 
+    description: "The markdown summary of the action."
+ 
 runs:
   using: "node16"
   main: "dist/index.js"
