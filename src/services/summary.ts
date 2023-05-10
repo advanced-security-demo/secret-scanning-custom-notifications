@@ -1,11 +1,8 @@
 import * as core from '@actions/core'
 import {SummaryTableRow} from '@actions/core/lib/summary'
-import { SecretScanningAlert } from '../types/common/main'
+import {SecretScanningAlert} from '../types/common/main'
 
-export function addToSummary(
-  title: string,
-  alerts: SecretScanningAlert[],
-) {
+export function addToSummary(title: string, alerts: SecretScanningAlert[]) {
   const headers = ['Alert Number', 'Secret State', 'Secret Type', 'HTML URL']
   // Define the table rows
   const rows = alerts.map(alert => [
@@ -25,11 +22,11 @@ export function addToSummary(
     .addBreak()
 }
 
-export function writeSummary(){
-    core.summary.write()
-    core.info(`[✅] Action summary written`)
+export function writeSummary() {
+  core.summary.write()
+  core.info(`[✅] Action summary written`)
 }
 
-export function getSummaryMarkdown(){
-    return core.summary.stringify()
+export function getSummaryMarkdown() {
+  return core.summary.stringify()
 }

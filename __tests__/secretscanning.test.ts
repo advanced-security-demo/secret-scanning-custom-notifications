@@ -2,10 +2,7 @@ import {
   getSecretScanningAlertsForScope,
   filterAlerts
 } from '../src/services/secretscanning'
-import {
-  inputsReturned,
-  SecretScanningAlert
-} from '../src/types/common'
+import {inputsReturned, SecretScanningAlert} from '../src/types/common'
 import {fetchSecretScanningAlerts} from '../src/api/secretscanningalerts'
 
 jest.mock('@actions/core')
@@ -80,7 +77,6 @@ describe('secretscanning', () => {
       expect(result).toEqual(alerts)
       expect(fetchSecretScanningAlerts).toHaveBeenCalledWith(input)
     })
-
   })
 
   describe('filterAlerts', () => {
